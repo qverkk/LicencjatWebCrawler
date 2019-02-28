@@ -11,7 +11,7 @@ class Node {
         this.parent = null
     }
 
-    constructor(data: String, parent: Node) {
+    constructor(data: String, parent: Node?) {
         this.data = data
         this.parent = parent
     }
