@@ -10,12 +10,11 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <HBox prefWidth="200.0">
          <children>
-            <TextField maxWidth="1.7976931348623157E308" minWidth="590.0" promptText="Please enter a website url">
+            <TextField fx:id="websiteUrlTextField" maxWidth="1.7976931348623157E308" minWidth="590.0" promptText="Please enter a website url">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -39,7 +38,7 @@
                               <Insets left="60.0" />
                            </HBox.margin>
                         </Label>
-                        <Label minWidth="50.0" text="0" />
+                        <Label fx:id="threadsUsedLabel" minWidth="50.0" text="0" />
                      </children>
                      <VBox.margin>
                         <Insets top="5.0" />
@@ -52,7 +51,7 @@
                               <Insets left="60.0" />
                            </HBox.margin>
                         </Label>
-                        <Label minWidth="50.0" text="0" />
+                        <Label fx:id="depthSearchLabel" minWidth="50.0" text="0" />
                      </children>
                      <VBox.margin>
                         <Insets top="5.0" />
@@ -68,7 +67,7 @@
                         <Insets top="5.0" />
                      </VBox.margin>
                   </Label>
-                  <Slider blockIncrement="1.0" majorTickUnit="1.0" max="10.0" min="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0">
+                  <Slider fx:id="threadsSlider" blockIncrement="1.0" majorTickUnit="1.0" max="10.0" min="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0">
                      <VBox.margin>
                         <Insets left="5.0" right="5.0" top="5.0" />
                      </VBox.margin>
@@ -78,19 +77,19 @@
                         <Insets top="5.0" />
                      </VBox.margin>
                   </Label>
-                  <Slider blockIncrement="1.0" majorTickUnit="300.0" max="1000.0" min="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="100.0">
+                  <Slider fx:id="maxDepthSlider" blockIncrement="1.0" majorTickUnit="300.0" max="1000.0" min="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="100.0">
                      <VBox.margin>
                         <Insets left="5.0" right="5.0" top="5.0" />
                      </VBox.margin>
                   </Slider>
                   <Separator prefWidth="200.0" />
                   <Label alignment="CENTER" maxWidth="1.7976931348623157E308" text="Controlls" />
-                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Start">
+                  <Button fx:id="startButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Start">
                      <VBox.margin>
                         <Insets left="5.0" right="5.0" top="5.0" />
                      </VBox.margin>
                   </Button>
-                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Terminate">
+                  <Button fx:id="terminateButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Terminate">
                      <VBox.margin>
                         <Insets left="5.0" right="5.0" top="5.0" />
                      </VBox.margin>
