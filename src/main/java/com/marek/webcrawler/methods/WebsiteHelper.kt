@@ -1,14 +1,12 @@
 package com.marek.webcrawler.methods
 
+import com.marek.webcrawler.config.Config
 import com.marek.webcrawler.tree.VisitedTree
+import com.marek.webcrawler.ui.controllers.logStatus
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 
 class WebsiteHelper {
-
-    companion object {
-        var visitedUrls: MutableList<String> = mutableListOf()
-    }
 
     fun getWebsiteUrls(url: String, tree: VisitedTree): List<String> {
         val connection = connectTo(url)
@@ -21,18 +19,19 @@ class WebsiteHelper {
                 for (linkElement in linkElements) {
                     val hrefAttr = linkElement.attr("href")
                     if (hrefAttr.startsWith("http")) {
-                        if (!visitedUrls.contains(hrefAttr)) {
+                        if (!Config.visitedWebsites.contains(hrefAttr)) {
                             list.add(hrefAttr)
-                            visitedUrls.add(hrefAttr)
+                            val count = Config.visitedWebsites[hrefAttr]
+                            Config.visitedWebsites[hrefAttr] = count?.plus(1) ?: 1
                             tree.addUrl(url, hrefAttr)
-                            if (visitedUrls.size < 10) {
+                            /*if (visitedUrls.size < 10) {
                                 getWebsiteUrls(hrefAttr, tree)
-                            }
+                            }*/
                         }
                     }
                 }
             } catch (exception: Exception) {
-
+                logStatus("Error connection to website $url")
             }
 
         }

@@ -1,12 +1,13 @@
 package com.marek.webcrawler.ui.controllers
 
 import com.marek.webcrawler.config.Config
+import com.marek.webcrawler.methods.WebsiteHelper
+import com.marek.webcrawler.tree.Node
+import com.marek.webcrawler.tree.VisitedTree
+import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
-import javafx.scene.control.Button
-import javafx.scene.control.Label
-import javafx.scene.control.Slider
-import javafx.scene.control.TextField
+import javafx.scene.control.*
 import java.net.URL
 import java.util.*
 
@@ -30,6 +31,9 @@ class MainPresenter(val config: Config) : Initializable {
     @FXML
     private lateinit var websiteUrlTextField: TextField
 
+    @FXML
+    private lateinit var statusListView: ListView<String>
+
     private val thread = Thread {
         Runnable {
             while (!Thread.interrupted()) {
@@ -42,6 +46,8 @@ class MainPresenter(val config: Config) : Initializable {
                         threadsSlider.isDisable = true
                     if (::maxDepthSlider.isInitialized && !maxDepthSlider.isDisabled)
                         maxDepthSlider.isDisable = true
+                    if (::websiteUrlTextField.isInitialized && !websiteUrlTextField.isDisabled)
+                        websiteUrlTextField.isDisable = true
                     if (::terminateButton.isInitialized && terminateButton.isDisabled)
                         terminateButton.isDisable = false
                 } else {
@@ -51,10 +57,12 @@ class MainPresenter(val config: Config) : Initializable {
                         threadsSlider.isDisable = false
                     if (::maxDepthSlider.isInitialized && maxDepthSlider.isDisabled)
                         maxDepthSlider.isDisable = false
+                    if (::websiteUrlTextField.isInitialized && websiteUrlTextField.isDisabled)
+                        websiteUrlTextField.isDisable = false
                     if (::terminateButton.isInitialized && !terminateButton.isDisabled)
                         terminateButton.isDisable = true
                 }
-                Thread.sleep(20)
+                Thread.sleep(50)
             }
         }.run()
     }
@@ -62,6 +70,7 @@ class MainPresenter(val config: Config) : Initializable {
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         threadsUsedLabel.text = threadsSlider.value.toInt().toString()
         depthSearchLabel.text = maxDepthSlider.value.toInt().toString()
+        statusListView.items = Config.status
 
         initializeListeners()
         thread.start()
@@ -87,11 +96,30 @@ class MainPresenter(val config: Config) : Initializable {
             if (!url.isNullOrEmpty()) {
                 config.running = true
                 config.startUrl = url
+                logStatus("Starting...")
+                kotlin.concurrent.thread(block = {
+                    val webHelper = WebsiteHelper()
+                    val node = Node(url, null)
+                    val tree = VisitedTree(node)
+                    webHelper.getWebsiteUrls(url, tree)
+                    val list = tree.getAsList(node)
+                    list.forEach {
+                        logStatus(it)
+                    }
+                    config.running = false
+                    logStatus("Finished...")
+                })
             }
         }
 
         terminateButton.setOnAction {
             config.running = false
         }
+    }
+}
+
+fun logStatus(status: String) {
+    Platform.runLater {
+        Config.status.add(status)
     }
 }
