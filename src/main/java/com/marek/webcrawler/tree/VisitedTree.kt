@@ -2,7 +2,7 @@ package com.marek.webcrawler.tree
 
 import java.util.*
 
-class VisitedTree(val root: Node?) {
+class VisitedTree(var root: Node?) {
 
     fun getDepth(node: Node): Int {
         var depth = 0
@@ -69,7 +69,7 @@ class VisitedTree(val root: Node?) {
 
             var tmp = ""
             for (i in 0..depth) {
-                tmp += "-"
+                tmp += "~"
             }
             tmp += pop.data
             list.add(tmp)
@@ -79,6 +79,15 @@ class VisitedTree(val root: Node?) {
                 stack.push(it)
             }
         }
+        list.sortWith(Comparator { o1, o2 ->
+            val c1 = o1.count { it == '~' }
+            val c2 = o2.count { it == '~' }
+            when {
+                c1 < c2 -> -1
+                c1 > c2 -> 1
+                else -> 0
+            }
+        })
         return list.toList()
     }
 }

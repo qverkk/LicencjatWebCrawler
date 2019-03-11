@@ -1,9 +1,8 @@
 package com.marek.webcrawler.ui.controllers
 
 import com.marek.webcrawler.config.Config
-import com.marek.webcrawler.methods.WebsiteHelper
+import com.marek.webcrawler.threads.CrawlerThread
 import com.marek.webcrawler.tree.Node
-import com.marek.webcrawler.tree.VisitedTree
 import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
@@ -39,7 +38,7 @@ class MainPresenter(val config: Config) : Initializable {
             while (!Thread.interrupted()) {
                 if (config.applicationClosed) {
                     break
-                } else if (config.running) {
+                } else if (Config.running) {
                     if (::startButton.isInitialized && !startButton.isDisabled)
                         startButton.isDisable = true
                     if (::threadsSlider.isInitialized && !threadsSlider.isDisabled)
@@ -71,6 +70,8 @@ class MainPresenter(val config: Config) : Initializable {
         threadsUsedLabel.text = threadsSlider.value.toInt().toString()
         depthSearchLabel.text = maxDepthSlider.value.toInt().toString()
         statusListView.items = Config.status
+        Config.numberOfThreads = threadsSlider.value.toInt()
+        Config.maxNumberOfSearches = maxDepthSlider.value.toInt()
 
         initializeListeners()
         thread.start()
@@ -79,14 +80,14 @@ class MainPresenter(val config: Config) : Initializable {
     private fun initializeListeners() {
         threadsSlider.valueProperty().addListener { _, _, newValue ->
             val newIntValue = newValue.toInt()
-            config.numberOfThreads = newIntValue
+            Config.numberOfThreads = newIntValue
             threadsUsedLabel.text = newIntValue.toString()
             threadsSlider.value = newIntValue.toDouble()
         }
 
         maxDepthSlider.valueProperty().addListener { _, _, newValue ->
             val newIntValue = newValue.toInt()
-            config.maxNumberOfSearches = newIntValue
+            Config.maxNumberOfSearches = newIntValue
             depthSearchLabel.text = newIntValue.toString()
             maxDepthSlider.value = newIntValue.toDouble()
         }
@@ -94,10 +95,17 @@ class MainPresenter(val config: Config) : Initializable {
         startButton.setOnAction {
             val url = websiteUrlTextField.text
             if (!url.isNullOrEmpty()) {
-                config.running = true
+                Config.running = true
+
+                Config.urlList.clear()
+                Config.visitedWebsites.clear()
+                Config.domainCount.clear()
+
+                Config.urlList.put(url)
+                Config.visitedTree.root = Node(url, null)
                 config.startUrl = url
                 logStatus("Starting...")
-                kotlin.concurrent.thread(block = {
+                /*kotlin.concurrent.thread(block = {
                     val webHelper = WebsiteHelper()
                     val node = Node(url, null)
                     val tree = VisitedTree(node)
@@ -108,12 +116,42 @@ class MainPresenter(val config: Config) : Initializable {
                     }
                     config.running = false
                     logStatus("Finished...")
-                })
+                })*/
+                val startTime = System.currentTimeMillis()
+                val threads = mutableListOf<CrawlerThread>()
+                for (i in 0..(Config.numberOfThreads - 1)) {
+                    println(i)
+                    threads.add(CrawlerThread())
+                    threads[i].start()
+                }
+
+                kotlin.concurrent.thread {
+                    logStatus("Running...")
+                    while (true) {
+                        var counter = 0
+                        for (thread in threads) {
+                            if (thread.state == Thread.State.WAITING || thread.state == Thread.State.TERMINATED)
+                                counter++
+                        }
+                        if (counter == Config.numberOfThreads - 1)
+                            break
+                    }
+                    for (thread in threads) {
+                        thread.interrupt()
+                    }
+                    val list = Config.visitedTree.getAsList(Config.visitedTree.root!!)
+                    list.forEach {
+                        logStatus(it)
+                    }
+                    Config.running = false
+                    logStatus("Finished...")
+                    logStatus("In: ${System.currentTimeMillis() - startTime} ms")
+                }
             }
         }
 
         terminateButton.setOnAction {
-            config.running = false
+            Config.running = false
         }
     }
 }
