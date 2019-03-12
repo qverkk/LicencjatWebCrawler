@@ -7,6 +7,7 @@ import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.*
+import javafx.scene.layout.HBox
 import java.net.URL
 import java.util.*
 
@@ -32,6 +33,9 @@ class MainPresenter(val config: Config) : Initializable {
 
     @FXML
     private lateinit var statusListView: ListView<String>
+
+    @FXML
+    private lateinit var threadsHbox: HBox
 
     private val thread = Thread {
         Runnable {
@@ -104,6 +108,7 @@ class MainPresenter(val config: Config) : Initializable {
                 Config.urlList.put(url)
                 Config.visitedTree.root = Node(url, null)
                 config.startUrl = url
+                threadsHbox.children.clear()
                 logStatus("Starting...")
                 /*kotlin.concurrent.thread(block = {
                     val webHelper = WebsiteHelper()
@@ -121,7 +126,7 @@ class MainPresenter(val config: Config) : Initializable {
                 val threads = mutableListOf<CrawlerThread>()
                 for (i in 0..(Config.numberOfThreads - 1)) {
                     println(i)
-                    threads.add(CrawlerThread(i))
+                    threads.add(CrawlerThread(i, this))
                     threads[i].start()
                 }
 
@@ -153,6 +158,12 @@ class MainPresenter(val config: Config) : Initializable {
         terminateButton.setOnAction {
             Config.running = false
         }
+    }
+
+    fun getThreadHbox(): HBox? {
+        if (::threadsHbox.isInitialized)
+            return threadsHbox
+        return null
     }
 }
 
