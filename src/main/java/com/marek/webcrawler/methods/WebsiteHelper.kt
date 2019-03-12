@@ -21,13 +21,10 @@ class WebsiteHelper {
                     val hrefAttr = linkElement.attr("href")
                     if (hrefAttr.startsWith("http")) {
                         if (!Config.visitedWebsites.contains(hrefAttr)) {
+                            println(Config.visitedWebsites.size)
                             list.add(hrefAttr)
                             Config.urlList.put(hrefAttr)
                             tree.addUrl(url, hrefAttr)
-                            if (Config.visitedWebsites.size <= Config.maxNumberOfSearches) {
-                                getWebsiteUrls(hrefAttr, tree)
-                            } else
-                                break
                         }
                         if (Config.visitedWebsites.containsKey(hrefAttr)) {
                             val count = Config.visitedWebsites[hrefAttr]
@@ -46,8 +43,6 @@ class WebsiteHelper {
             } catch (exception: Exception) {
                 logStatus("Error connection to website $url")
                 logStatus(exception.toString())
-                if (exception.toString().contains("Status=429"))
-                    Config.running = false
             }
 
         }

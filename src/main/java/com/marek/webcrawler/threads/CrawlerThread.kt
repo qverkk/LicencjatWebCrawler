@@ -3,7 +3,7 @@ package com.marek.webcrawler.threads
 import com.marek.webcrawler.config.Config
 import com.marek.webcrawler.methods.WebsiteHelper
 
-class CrawlerThread : Thread() {
+class CrawlerThread(val number: Int) : Thread() {
 
     override fun run() {
         val websiteHelper = WebsiteHelper()
@@ -13,8 +13,10 @@ class CrawlerThread : Thread() {
             if (Config.visitedWebsites.size > Config.maxNumberOfSearches || !Config.running)
                 break
             val host = Config.urlList.poll()
-            if (host != null)
+            if (host != null) {
+                println("Thread$number visiting $host")
                 websiteHelper.getWebsiteUrls(host, Config.visitedTree)
+            }
         }
     }
 }

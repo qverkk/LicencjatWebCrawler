@@ -121,7 +121,7 @@ class MainPresenter(val config: Config) : Initializable {
                 val threads = mutableListOf<CrawlerThread>()
                 for (i in 0..(Config.numberOfThreads - 1)) {
                     println(i)
-                    threads.add(CrawlerThread())
+                    threads.add(CrawlerThread(i))
                     threads[i].start()
                 }
 
@@ -133,7 +133,7 @@ class MainPresenter(val config: Config) : Initializable {
                             if (thread.state == Thread.State.WAITING || thread.state == Thread.State.TERMINATED)
                                 counter++
                         }
-                        if (counter == Config.numberOfThreads - 1)
+                        if (counter == Config.numberOfThreads)
                             break
                     }
                     for (thread in threads) {
