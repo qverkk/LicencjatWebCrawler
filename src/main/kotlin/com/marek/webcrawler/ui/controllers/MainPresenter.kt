@@ -126,7 +126,27 @@ class MainPresenter(val config: Config) : Initializable {
                 val threads = mutableListOf<CrawlerThread>()
                 for (i in 0..(Config.numberOfThreads - 1)) {
                     println(i)
-                    threads.add(CrawlerThread(i, this))
+                    threads.add(object : CrawlerThread(i) {
+                        private val threadPresenter = ThreadPresenter(config, this@MainPresenter)
+
+                        override fun onVisit(url: String) {
+                            threadPresenter.setColor("green", "Running")
+                            threadPresenter.updateVisitedUrl(url)
+                            Platform.runLater {
+                                if (!threadsHbox.children.contains(threadPresenter.parent)) {
+                                    threadsHbox.children.add(threadPresenter.parent)
+                                }
+                            }
+                        }
+
+                        override fun onStarted() {
+                            threadPresenter.setThreadNumber(number)
+                        }
+
+                        override fun onStopped() {
+                            threadPresenter.setColor("red", "Stopped")
+                        }
+                    })
                     threads[i].start()
                 }
 
@@ -158,12 +178,6 @@ class MainPresenter(val config: Config) : Initializable {
         terminateButton.setOnAction {
             Config.running = false
         }
-    }
-
-    fun getThreadHbox(): HBox? {
-        if (::threadsHbox.isInitialized)
-            return threadsHbox
-        return null
     }
 }
 
