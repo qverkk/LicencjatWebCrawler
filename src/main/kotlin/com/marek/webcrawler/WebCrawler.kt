@@ -1,6 +1,9 @@
 package com.marek.webcrawler
 
 import com.marek.webcrawler.config.Config
+import com.marek.webcrawler.methods.WebsiteHelper
+import com.marek.webcrawler.tree.Node
+import com.marek.webcrawler.tree.VisitedTree
 import com.marek.webcrawler.ui.presentation.MainView
 import javafx.application.Application
 import javafx.scene.Scene
@@ -21,13 +24,7 @@ class WebCrawler : Application() {
         }
     }
 }
-/*fun main() {
-    val webHelper = WebsiteHelper()
-    val link = "http://www.kul.pl/"
-    val node = Node(link, null)
-    val tree = VisitedTree(node)
-    webHelper.getWebsiteUrls(link, tree)
-    tree.print(node)
 
-    MainView()
-}*/
+fun main(args: Array<String>) {
+    Application.launch(WebCrawler::class.java)
+}
