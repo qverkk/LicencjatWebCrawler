@@ -1,9 +1,6 @@
 package com.marek.webcrawler
 
 import com.marek.webcrawler.config.Config
-import com.marek.webcrawler.methods.WebsiteHelper
-import com.marek.webcrawler.tree.Node
-import com.marek.webcrawler.tree.VisitedTree
 import com.marek.webcrawler.ui.presentation.MainView
 import javafx.application.Application
 import javafx.scene.Scene

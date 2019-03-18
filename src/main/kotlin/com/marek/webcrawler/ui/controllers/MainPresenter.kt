@@ -1,13 +1,15 @@
 package com.marek.webcrawler.ui.controllers
 
 import com.marek.webcrawler.config.Config
-import com.marek.webcrawler.threads.CrawlerThread
+import com.marek.webcrawler.threads.CrawlerCoroutine
 import com.marek.webcrawler.tree.Node
 import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.*
 import javafx.scene.layout.HBox
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.net.URL
 import java.util.*
 
@@ -123,7 +125,56 @@ class MainPresenter(val config: Config) : Initializable {
                     logStatus("Finished...")
                 })*/
                 val startTime = System.currentTimeMillis()
-                val threads = mutableListOf<CrawlerThread>()
+                val coroutines = mutableListOf<CrawlerCoroutine>()
+                for (i in 0..(Config.numberOfThreads - 1)) {
+                    coroutines.add(object : CrawlerCoroutine(i) {
+                        private val threadPresenter = ThreadPresenter(config, this@MainPresenter)
+
+                        override fun onVisit(url: String) {
+                            threadPresenter.setColor("green", "Running")
+                            threadPresenter.updateVisitedUrl(url)
+                            Platform.runLater {
+                                if (!threadsHbox.children.contains(threadPresenter.parent)) {
+                                    threadsHbox.children.add(threadPresenter.parent)
+                                }
+                            }
+                        }
+
+                        override fun onStarted() {
+                            threadPresenter.setThreadNumber(number)
+                        }
+
+                        override fun onStopped() {
+                            threadPresenter.setColor("red", "Stopped")
+                        }
+                    })
+                    GlobalScope.launch {
+                        coroutines[i].run()
+                    }
+                }
+
+                kotlin.concurrent.thread {
+                    logStatus("Running...")
+                    while (true) {
+                        var counter = 0
+                        for (coroutine in coroutines) {
+                            if (!coroutine.running)
+                                counter++
+                        }
+                        if (counter == Config.numberOfThreads)
+                            break
+                    }
+                    val list = Config.visitedTree.getAsList(Config.visitedTree.root!!)
+                    list.forEach {
+                        logStatus(it)
+                    }
+                    Config.running = false
+                    logStatus("Finished...")
+                    logStatus("In: ${System.currentTimeMillis() - startTime} ms")
+
+                }
+
+                /*val threads = mutableListOf<CrawlerThread>()
                 for (i in 0..(Config.numberOfThreads - 1)) {
                     println(i)
                     threads.add(object : CrawlerThread(i) {
@@ -171,7 +222,7 @@ class MainPresenter(val config: Config) : Initializable {
                     Config.running = false
                     logStatus("Finished...")
                     logStatus("In: ${System.currentTimeMillis() - startTime} ms")
-                }
+                }*/
             }
         }
 
