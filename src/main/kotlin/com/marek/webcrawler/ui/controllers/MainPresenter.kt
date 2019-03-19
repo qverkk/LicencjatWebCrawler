@@ -2,6 +2,7 @@ package com.marek.webcrawler.ui.controllers
 
 import com.marek.webcrawler.config.Config
 import com.marek.webcrawler.threads.CrawlerCoroutine
+import com.marek.webcrawler.threads.CrawlerThread
 import com.marek.webcrawler.tree.Node
 import javafx.application.Platform
 import javafx.fxml.FXML
@@ -37,6 +38,9 @@ class MainPresenter(val config: Config) : Initializable {
     private lateinit var statusListView: ListView<String>
 
     @FXML
+    private lateinit var coroutinesCheckbox: CheckBox
+
+    @FXML
     private lateinit var threadsHbox: HBox
 
     private val thread = Thread {
@@ -53,6 +57,8 @@ class MainPresenter(val config: Config) : Initializable {
                         maxDepthSlider.isDisable = true
                     if (::websiteUrlTextField.isInitialized && !websiteUrlTextField.isDisabled)
                         websiteUrlTextField.isDisable = true
+                    if (::coroutinesCheckbox.isInitialized && !coroutinesCheckbox.isDisabled)
+                        coroutinesCheckbox.isDisable = true
                     if (::terminateButton.isInitialized && terminateButton.isDisabled)
                         terminateButton.isDisable = false
                 } else {
@@ -64,6 +70,8 @@ class MainPresenter(val config: Config) : Initializable {
                         maxDepthSlider.isDisable = false
                     if (::websiteUrlTextField.isInitialized && websiteUrlTextField.isDisabled)
                         websiteUrlTextField.isDisable = false
+                    if (::coroutinesCheckbox.isInitialized && coroutinesCheckbox.isDisabled)
+                        coroutinesCheckbox.isDisable = false
                     if (::terminateButton.isInitialized && !terminateButton.isDisabled)
                         terminateButton.isDisable = true
                 }
@@ -98,6 +106,14 @@ class MainPresenter(val config: Config) : Initializable {
             maxDepthSlider.value = newIntValue.toDouble()
         }
 
+        coroutinesCheckbox.setOnAction {
+            if (coroutinesCheckbox.isSelected) {
+                threadsSlider.max = 1000.0
+            } else {
+                threadsSlider.max = 10.0
+            }
+        }
+
         startButton.setOnAction {
             val url = websiteUrlTextField.text
             if (!url.isNullOrEmpty()) {
@@ -112,122 +128,121 @@ class MainPresenter(val config: Config) : Initializable {
                 config.startUrl = url
                 threadsHbox.children.clear()
                 logStatus("Starting...")
-                /*kotlin.concurrent.thread(block = {
-                    val webHelper = WebsiteHelper()
-                    val node = Node(url, null)
-                    val tree = VisitedTree(node)
-                    webHelper.getWebsiteUrls(url, tree)
-                    val list = tree.getAsList(node)
-                    list.forEach {
-                        logStatus(it)
-                    }
-                    config.running = false
-                    logStatus("Finished...")
-                })*/
-                val startTime = System.currentTimeMillis()
-                val coroutines = mutableListOf<CrawlerCoroutine>()
-                for (i in 0..(Config.numberOfThreads - 1)) {
-                    coroutines.add(object : CrawlerCoroutine(i) {
-                        private val threadPresenter = ThreadPresenter(config, this@MainPresenter)
 
-                        override fun onVisit(url: String) {
-                            threadPresenter.setColor("green", "Running")
-                            threadPresenter.updateVisitedUrl(url)
-                            Platform.runLater {
-                                if (!threadsHbox.children.contains(threadPresenter.parent)) {
-                                    threadsHbox.children.add(threadPresenter.parent)
-                                }
-                            }
-                        }
-
-                        override fun onStarted() {
-                            threadPresenter.setThreadNumber(number)
-                        }
-
-                        override fun onStopped() {
-                            threadPresenter.setColor("red", "Stopped")
-                        }
-                    })
-                    GlobalScope.launch {
-                        coroutines[i].run()
-                    }
-                }
-
-                kotlin.concurrent.thread {
-                    logStatus("Running...")
-                    while (true) {
-                        var counter = 0
-                        for (coroutine in coroutines) {
-                            if (!coroutine.running)
-                                counter++
-                        }
-                        if (counter == Config.numberOfThreads)
-                            break
-                    }
-                    val list = Config.visitedTree.getAsList(Config.visitedTree.root!!)
-                    list.forEach {
-                        logStatus(it)
-                    }
-                    Config.running = false
-                    logStatus("Finished...")
-                    logStatus("In: ${System.currentTimeMillis() - startTime} ms")
-
-                }
-
-                /*val threads = mutableListOf<CrawlerThread>()
-                for (i in 0..(Config.numberOfThreads - 1)) {
-                    println(i)
-                    threads.add(object : CrawlerThread(i) {
-                        private val threadPresenter = ThreadPresenter(config, this@MainPresenter)
-
-                        override fun onVisit(url: String) {
-                            threadPresenter.setColor("green", "Running")
-                            threadPresenter.updateVisitedUrl(url)
-                            Platform.runLater {
-                                if (!threadsHbox.children.contains(threadPresenter.parent)) {
-                                    threadsHbox.children.add(threadPresenter.parent)
-                                }
-                            }
-                        }
-
-                        override fun onStarted() {
-                            threadPresenter.setThreadNumber(number)
-                        }
-
-                        override fun onStopped() {
-                            threadPresenter.setColor("red", "Stopped")
-                        }
-                    })
-                    threads[i].start()
-                }
-
-                kotlin.concurrent.thread {
-                    logStatus("Running...")
-                    while (true) {
-                        var counter = 0
-                        for (thread in threads) {
-                            if (thread.state == Thread.State.WAITING || thread.state == Thread.State.TERMINATED)
-                                counter++
-                        }
-                        if (counter == Config.numberOfThreads)
-                            break
-                    }
-                    for (thread in threads) {
-                        thread.interrupt()
-                    }
-                    val list = Config.visitedTree.getAsList(Config.visitedTree.root!!)
-                    list.forEach {
-                        logStatus(it)
-                    }
-                    Config.running = false
-                    logStatus("Finished...")
-                    logStatus("In: ${System.currentTimeMillis() - startTime} ms")
-                }*/
+                if (coroutinesCheckbox.isSelected)
+                    launchCoroutines()
+                else
+                    launchThreads()
             }
         }
 
         terminateButton.setOnAction {
             Config.running = false
+        }
+    }
+
+    private fun launchThreads() {
+        val startTime = System.currentTimeMillis()
+        val threads = mutableListOf<CrawlerThread>()
+        for (i in 0..(Config.numberOfThreads - 1)) {
+            println(i)
+            threads.add(object : CrawlerThread(i) {
+                private val threadPresenter = ThreadPresenter(config, this@MainPresenter)
+
+                override fun onVisit(url: String) {
+                    threadPresenter.setColor("green", "Running")
+                    threadPresenter.updateVisitedUrl(url)
+                    Platform.runLater {
+                        if (!threadsHbox.children.contains(threadPresenter.parent)) {
+                            threadsHbox.children.add(threadPresenter.parent)
+                        }
+                    }
+                }
+
+                override fun onStarted() {
+                    threadPresenter.setThreadNumber(number)
+                }
+
+                override fun onStopped() {
+                    threadPresenter.setColor("red", "Stopped")
+                }
+            })
+            threads[i].start()
+        }
+
+        kotlin.concurrent.thread {
+            logStatus("Running...")
+            while (true) {
+                var counter = 0
+                for (thread in threads) {
+                    if (thread.state == Thread.State.WAITING || thread.state == Thread.State.TERMINATED)
+                        counter++
+                }
+                if (counter == Config.numberOfThreads)
+                    break
+            }
+            for (thread in threads) {
+                thread.interrupt()
+            }
+            val list = Config.visitedTree.getAsList(Config.visitedTree.root!!)
+            list.forEach {
+                logStatus(it)
+            }
+            Config.running = false
+            logStatus("Finished...")
+            logStatus("In: ${System.currentTimeMillis() - startTime} ms")
+        }
+    }
+
+    private fun launchCoroutines() {
+        val startTime = System.currentTimeMillis()
+        val coroutines = mutableListOf<CrawlerCoroutine>()
+        for (i in 0..(Config.numberOfThreads - 1)) {
+            coroutines.add(object : CrawlerCoroutine(i) {
+                private val threadPresenter = ThreadPresenter(config, this@MainPresenter)
+
+                override fun onVisit(url: String) {
+                    threadPresenter.setColor("green", "Running")
+                    threadPresenter.updateVisitedUrl(url)
+                    Platform.runLater {
+                        if (!threadsHbox.children.contains(threadPresenter.parent)) {
+                            threadsHbox.children.add(threadPresenter.parent)
+                        }
+                    }
+                }
+
+                override fun onStarted() {
+                    threadPresenter.setThreadNumber(number)
+                }
+
+                override fun onStopped() {
+                    threadPresenter.setColor("red", "Stopped")
+                }
+            })
+            GlobalScope.launch {
+                coroutines[i].run()
+            }
+        }
+
+        kotlin.concurrent.thread {
+            logStatus("Running...")
+            while (true) {
+                var counter = 0
+                for (coroutine in coroutines) {
+                    if (!coroutine.running)
+                        counter++
+                }
+                if (counter == Config.numberOfThreads)
+                    break
+            }
+            val list = Config.visitedTree.getAsList(Config.visitedTree.root!!)
+            list.forEach {
+                logStatus(it)
+            }
+            Config.running = false
+            logStatus("Finished...")
+            logStatus("In: ${System.currentTimeMillis() - startTime} ms")
+
         }
     }
 }
