@@ -21,7 +21,7 @@ class ThreadPresenter(val config: Config, val mainPresenter: MainPresenter) : In
     private lateinit var threadVbox: VBox
 
     @FXML
-    private lateinit var threadNumberLabel: Label
+    lateinit var threadNumberLabel: Label
     @FXML
     private lateinit var statusIndicatorLabel: Label
 
@@ -38,9 +38,9 @@ class ThreadPresenter(val config: Config, val mainPresenter: MainPresenter) : In
         }
     }
 
-    fun setThreadNumber(number: Int) {
+    fun setThreadNumber(number: Int, type: String) {
         Platform.runLater {
-            threadNumberLabel.text = "Thread $number"
+            threadNumberLabel.text = "$type $number"
         }
     }
 

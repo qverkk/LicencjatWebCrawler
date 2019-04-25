@@ -8,8 +8,9 @@ import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.*
-import javafx.scene.layout.HBox
+import javafx.scene.layout.FlowPane
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import java.net.URL
 import java.util.*
@@ -41,7 +42,7 @@ class MainPresenter(val config: Config) : Initializable {
     private lateinit var coroutinesCheckbox: CheckBox
 
     @FXML
-    private lateinit var threadsHbox: HBox
+    private lateinit var threadsHbox: FlowPane
 
     private val thread = Thread {
         Runnable {
@@ -81,6 +82,7 @@ class MainPresenter(val config: Config) : Initializable {
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
+        threadsSlider.max = Runtime.getRuntime().availableProcessors().toDouble()
         threadsUsedLabel.text = threadsSlider.value.toInt().toString()
         depthSearchLabel.text = maxDepthSlider.value.toInt().toString()
         statusListView.items = Config.status
@@ -104,14 +106,6 @@ class MainPresenter(val config: Config) : Initializable {
             Config.maxNumberOfSearches = newIntValue
             depthSearchLabel.text = newIntValue.toString()
             maxDepthSlider.value = newIntValue.toDouble()
-        }
-
-        coroutinesCheckbox.setOnAction {
-            if (coroutinesCheckbox.isSelected) {
-                threadsSlider.max = 1000.0
-            } else {
-                threadsSlider.max = 10.0
-            }
         }
 
         startButton.setOnAction {
@@ -160,7 +154,7 @@ class MainPresenter(val config: Config) : Initializable {
                 }
 
                 override fun onStarted() {
-                    threadPresenter.setThreadNumber(number)
+                    threadPresenter.setThreadNumber(number, "Thread")
                 }
 
                 override fun onStopped() {
@@ -212,13 +206,14 @@ class MainPresenter(val config: Config) : Initializable {
                 }
 
                 override fun onStarted() {
-                    threadPresenter.setThreadNumber(number)
+                    threadPresenter.setThreadNumber(number, "Coroutine")
                 }
 
                 override fun onStopped() {
                     threadPresenter.setColor("red", "Stopped")
                 }
             })
+
             GlobalScope.launch {
                 coroutines[i].run()
             }
@@ -232,7 +227,7 @@ class MainPresenter(val config: Config) : Initializable {
                     if (!coroutine.running)
                         counter++
                 }
-                if (counter == Config.numberOfThreads)
+                if (counter == Config.numberOfThreads && Config.visitedWebsites.size >= Config.maxNumberOfSearches)
                     break
             }
             val list = Config.visitedTree.getAsList(Config.visitedTree.root!!)
@@ -242,7 +237,6 @@ class MainPresenter(val config: Config) : Initializable {
             Config.running = false
             logStatus("Finished...")
             logStatus("In: ${System.currentTimeMillis() - startTime} ms")
-
         }
     }
 }
