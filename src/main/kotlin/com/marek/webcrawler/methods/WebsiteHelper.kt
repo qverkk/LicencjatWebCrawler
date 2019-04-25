@@ -21,7 +21,6 @@ class WebsiteHelper {
                     val hrefAttr = linkElement.attr("href")
                     if (hrefAttr.startsWith("http")) {
                         if (!Config.visitedWebsites.contains(hrefAttr)) {
-                            println(Config.visitedWebsites.size)
                             list.add(hrefAttr)
                             Config.urlList.put(hrefAttr)
                             tree.addUrl(url, hrefAttr)
