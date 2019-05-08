@@ -1,5 +1,6 @@
 package com.marek.webcrawler.ui.controllers
 
+import com.marek.testing.ui.presentation.GetView
 import com.marek.webcrawler.config.Config
 import com.marek.webcrawler.threads.CrawlerCoroutine
 import com.marek.webcrawler.threads.CrawlerThread
@@ -7,8 +8,10 @@ import com.marek.webcrawler.tree.Node
 import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
+import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.layout.FlowPane
+import javafx.stage.Stage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -31,6 +34,8 @@ class MainPresenter(val config: Config) : Initializable {
     private lateinit var startButton: Button
     @FXML
     private lateinit var terminateButton: Button
+    @FXML
+    private lateinit var restApiTestBtn: Button
 
     @FXML
     private lateinit var websiteUrlTextField: TextField
@@ -106,6 +111,15 @@ class MainPresenter(val config: Config) : Initializable {
             Config.maxNumberOfSearches = newIntValue
             depthSearchLabel.text = newIntValue.toString()
             maxDepthSlider.value = newIntValue.toDouble()
+        }
+
+        restApiTestBtn.setOnAction {
+            val view = GetView()
+
+            val scene = Scene(view.parent)
+            val stage = Stage()
+            stage.scene = scene
+            stage.show()
         }
 
         startButton.setOnAction {
