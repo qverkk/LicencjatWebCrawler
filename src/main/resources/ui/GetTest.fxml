@@ -14,23 +14,26 @@
    <children>
       <HBox prefWidth="200.0">
          <children>
-            <TextField fx:id="urlTF" prefHeight="40.0" prefWidth="450.0" />
-            <Button fx:id="getButton" mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0" text="GET" />
+            <TextField fx:id="urlTF" prefHeight="40.0" prefWidth="450.0" HBox.hgrow="ALWAYS" />
+            <Button fx:id="getButton" mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0" text="GET" HBox.hgrow="ALWAYS" />
          </children>
       </HBox>
       <CheckBox fx:id="threadCheckbox" alignment="CENTER" mnemonicParsing="false" prefHeight="26.0" prefWidth="606.0" text="Use thread" />
-      <HBox prefWidth="200.0">
+      <HBox prefWidth="200.0" VBox.vgrow="ALWAYS">
          <children>
-            <Label text="Thread delay">
+            <Label text="Thread delay" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets left="50.0" />
                </HBox.margin>
             </Label>
-            <Slider fx:id="delaySlider" blockIncrement="1.0" majorTickUnit="100.0" max="1000.0" prefHeight="42.0" prefWidth="213.0" showTickLabels="true" showTickMarks="true" />
-            <Label text="Current delay: " />
-            <Label fx:id="delayLabel" text="0" />
+            <Slider fx:id="delaySlider" blockIncrement="1.0" majorTickUnit="100.0" max="1000.0" prefHeight="42.0" prefWidth="213.0" showTickLabels="true" showTickMarks="true" HBox.hgrow="ALWAYS" />
+            <Label text="Current delay: " HBox.hgrow="ALWAYS" />
+            <Label fx:id="delayLabel" text="0" HBox.hgrow="ALWAYS">
+               <HBox.margin>
+                  <Insets right="50.0" />
+               </HBox.margin></Label>
          </children>
       </HBox>
-      <ListView fx:id="resultList" prefHeight="250.0" prefWidth="200.0" />
+      <ListView fx:id="resultList" prefHeight="250.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
    </children>
 </VBox>

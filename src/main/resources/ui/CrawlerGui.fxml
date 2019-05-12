@@ -13,11 +13,11 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="512.0" prefWidth="620.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="512.0" minWidth="620.0" prefHeight="512.0" prefWidth="620.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <HBox minWidth="590.0">
          <children>
-            <TextField fx:id="websiteUrlTextField" minWidth="590.0" promptText="Please enter a website url">
+            <TextField fx:id="websiteUrlTextField" minWidth="590.0" promptText="Please enter a website url" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -109,9 +109,9 @@
                   </Button>
                </children>
             </VBox>
-            <ScrollPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0">
+            <ScrollPane fitToHeight="true" fitToWidth="true" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" HBox.hgrow="ALWAYS">
                <content>
-                  <FlowPane fx:id="threadsHbox" />
+                  <FlowPane fx:id="threadsHbox" nodeOrientation="LEFT_TO_RIGHT" prefWrapLength="450.0" rowValignment="TOP" />
                </content>
             </ScrollPane>
          </children>
@@ -119,6 +119,6 @@
             <Insets bottom="5.0" />
          </VBox.margin>
       </HBox>
-      <ListView fx:id="statusListView" maxHeight="125.0" prefWidth="600.0" />
+      <ListView fx:id="statusListView" maxHeight="1.7976931348623157E308" prefWidth="600.0" VBox.vgrow="ALWAYS" />
    </children>
 </VBox>
