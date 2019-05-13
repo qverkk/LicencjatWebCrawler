@@ -22,6 +22,6 @@ class WebCrawler : Application() {
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     Application.launch(WebCrawler::class.java)
 }
