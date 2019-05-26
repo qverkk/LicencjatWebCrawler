@@ -15,7 +15,9 @@ class WebsiteHelper {
         val list = mutableListOf<String>()
         if (response.statusCode() != 404) {
             try {
-                val document = connection.get()
+                val document = connection
+                        .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36")
+                        .timeout(2000).get()
                 val linkElements = document.getElementsByTag("a")
                 for (linkElement in linkElements) {
                     val hrefAttr = linkElement.attr("href")
