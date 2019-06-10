@@ -17,7 +17,7 @@ class WebsiteHelper {
             try {
                 val document = connection
                         .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36")
-                        .timeout(2000).get()
+                        .get()
                 val linkElements = document.getElementsByTag("a")
                 for (linkElement in linkElements) {
                     val hrefAttr = linkElement.attr("href")
